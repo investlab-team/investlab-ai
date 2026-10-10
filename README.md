@@ -1,6 +1,6 @@
 # InvestLab AI
 
-Python 3.12 + FastAPI + Pydantic + uv. SQLAlchemy/PyMySQL·Alembic·NumPy를 후속 MySQL/RAG 구현에 사용할 기반 의존성으로 둡니다.
+Python 3.12 + FastAPI + Pydantic + uv. SQLAlchemy/Psycopg 3·Alembic·NumPy를 후속 PostgreSQL 16/RAG 구현에 사용할 기반 의존성으로 둡니다.
 
 `uv sync --locked`, `uv run --locked pytest`, `uv run --locked ruff check .`로 설치·검사합니다. 32자 이상 랜덤 `INVESTLAB_AI_SERVICE_TOKEN`을 환경에 설정하고 `uv run --locked uvicorn investlab_ai.main:create_app --factory --host 127.0.0.1 --port 8000`으로 실행합니다.
 
@@ -9,3 +9,5 @@ Python 3.12 + FastAPI + Pydantic + uv. SQLAlchemy/PyMySQL·Alembic·NumPy를 후
 AI 담당 유광민, 명세·인프라 송상진. 회의 설명과 CI 통과 후 작성자가 자기 PR을 머지할 수 있습니다. 전체 설계·규약은 backend/docs에서 관리합니다. Redis·벡터 DB는 확정하지 않았습니다.
 
 초기 main에는 협업 템플릿과 README만 등록합니다. 앱 코드·전체 설정은 chore/1-initial-scaffold PR에서 검토 후 작성자가 머지할 수 있습니다.
+
+DB는 PostgreSQL 16으로 확정합니다. 연결 환경변수는 [.env.example](.env.example), 물리 설계 기준은 [마이그레이션 안내](migrations/README.md)를 참고합니다. 실제 DB 연결은 후속 Repository 구현에서 적용합니다.
