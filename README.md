@@ -8,6 +8,6 @@ Python 3.12 + FastAPI + Pydantic + uv. SQLAlchemy/Psycopg 3·Alembic·NumPy를 �
 
 AI 담당 유광민, 명세·인프라 송상진. 회의 설명과 CI 통과 후 작성자가 자기 PR을 머지할 수 있습니다. 전체 설계·규약은 backend/docs에서 관리합니다. Redis·벡터 DB는 확정하지 않았습니다.
 
-초기 main에는 협업 템플릿과 README만 등록합니다. 앱 코드·전체 설정은 chore/1-initial-scaffold PR에서 검토 후 작성자가 머지할 수 있습니다.
+기본·개발 통합 브랜치는 `dev`입니다. 최신 `dev`에서 작업 브랜치를 만들고 PR도 `dev`로 보냅니다. 회의 설명과 CI 통과 후 작성자가 머지할 수 있습니다. `main`은 릴리스 기준으로 보존하며 반영 시점은 팀 합의 후 별도 PR로 정합니다.
 
 DB는 PostgreSQL 16으로 확정합니다. 연결 환경변수는 [.env.example](.env.example), 물리 설계 기준은 [마이그레이션 안내](migrations/README.md)를 참고합니다. 실제 DB 연결은 후속 Repository 구현에서 적용합니다.
