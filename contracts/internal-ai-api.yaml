@@ -1,0 +1,40 @@
+openapi: 3.1.0
+info:
+  title: InvestLab Internal AI API
+  version: 0.1.0
+  description: 초기 서비스 인증·미구현 경계 계약. 실제 분석·출처 응답은 후속 구현합니다.
+paths:
+  /health:
+    get:
+      security: []
+      responses:
+        '200':
+          description: 프로세스 liveness 정상. DB·LLM readiness를 보장하지 않습니다.
+  /internal/v1/questions:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [question]
+              properties:
+                question:
+                  type: string
+                  minLength: 1
+                  maxLength: 4000
+      responses:
+        '401':
+          description: 내부 서비스 인증 실패
+        '422':
+          description: 입력 검증 실패
+        '503':
+          description: AI_NOT_CONFIGURED. 아직 분석 기능을 제공하지 않습니다.
+components:
+  securitySchemes:
+    serviceAuth:
+      type: http
+      scheme: bearer
+security:
+  - serviceAuth: []
