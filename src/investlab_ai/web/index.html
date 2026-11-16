@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>InvestLab · 주가와 공시를 살펴보는 대화</title>
+  <link rel="stylesheet" href="/chat-assets/chat.css?v=20261116-sec">
+  <script src="/chat-assets/chat.js?v=20261116-sec" defer></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <a href="/" class="brand"><span class="brand-mark">i<span>↗</span></span>InvestLab<span class="brand-ai">AI</span></a>
+    <button class="new-chat" id="new-chat"><span>＋</span> 새로운 대화</button>
+    <p class="sidebar-label">내 대화</p>
+    <nav id="history" aria-label="이전 대화"></nav>
+    <div class="library"><span class="library-icon">▤</span><div><strong>공시 라이브러리</strong><p id="library-status">저장된 자료 확인 중</p></div></div>
+    <div class="sidebar-footer"><span class="avatar">나</span><div><strong>내 리서치 공간</strong><small>로컬 개발 환경</small></div><span class="online-dot"></span></div>
+  </aside>
+  <main>
+    <header><div class="header-title">주식 리서치 <span class="chevron">⌄</span></div><span class="source-label"><span></span>토스 시세 · DART · SEC 공시</span></header>
+    <section class="conversation" id="conversation" aria-live="polite">
+      <div class="welcome" id="welcome">
+        <div class="eyebrow"><span class="sparkle">✳</span> INVESTLAB RESEARCH</div>
+        <h1>주가부터 공시까지,<br><span>근거를 보며 이야기해요.</span></h1>
+        <p>기업명과 궁금한 점을 말해 주세요.<br>가격 흐름과 공시를 살펴보고, 판단에 필요한 근거를 보여드릴게요.</p>
+        <div class="suggestions">
+          <button data-prompt="삼성전자 최신 공시 설명해줘"><span class="suggestion-icon">↗</span><strong>최신 공시 살펴보기</strong><span>삼성전자 최신 공시 설명해줘</span><b>↗</b></button>
+          <button data-prompt="삼성전자 주가가 앞으로 한 달 동안 오를까?"><span class="suggestion-icon">▧</span><strong>주가 전망 살펴보기</strong><span>삼성전자 앞으로 한 달 동안 오를까?</span><b>↗</b></button>
+          <button data-prompt="엔비디아 최신 공시 설명해줘"><span class="suggestion-icon">⌁</span><strong>해외주식도 살펴보기</strong><span>엔비디아 최신 공시 설명해줘</span><b>↗</b></button>
+        </div>
+        <div class="welcome-note"><span>✓</span> 기본 분석은 한 번 만들고 저장해, 다음에는 바로 보여드려요.</div>
+      </div>
+      <div class="messages" id="messages"></div>
+    </section>
+    <div class="composer-area"><div class="context-pill" id="context" hidden></div>
+      <form id="chat-form" class="composer">
+        <label class="sr-only" for="message">주가·공시 질문</label>
+        <textarea id="message" rows="1" maxlength="4000" placeholder="예: 엔비디아 공시 설명해줘 / AAPL 주가 오를까?" aria-label="주가·공시 질문"></textarea>
+        <div class="composer-bottom"><span>기업명으로 시작하고, 편하게 이어서 질문하세요</span><button id="send" type="submit" aria-label="질문 보내기">↑</button></div>
+      </form>
+      <p class="disclaimer">AI의 해석에는 오류가 있을 수 있어요. 중요한 내용은 연결된 공시 원문을 함께 확인하세요.</p>
+    </div>
+  </main>
+</body>
+</html>
