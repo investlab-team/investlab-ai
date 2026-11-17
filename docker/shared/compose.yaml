@@ -1,0 +1,41 @@
+name: investlab-shared-client
+services:
+  ai:
+    image: ${INVESTLAB_APP_IMAGE:-investlab-ai:shared}
+    build:
+      context: ../..
+    restart: "no"
+    environment:
+      RESEARCH_DB_URL: ${RESEARCH_DB_URL:?Set the shared research connection URL}
+      INVESTLAB_AI_OBJECT_BUCKET: ${INVESTLAB_AI_OBJECT_BUCKET:-disclosures}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:?Set private object storage credentials}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:?Set private object storage credentials}
+      AWS_ENDPOINT_URL_S3: ${AWS_ENDPOINT_URL_S3:?Set branch object storage endpoint}
+      AWS_REGION: ${AWS_REGION:?Set object storage region}
+      INVESTLAB_AI_SERVICE_TOKEN: ${INVESTLAB_AI_SERVICE_TOKEN:?Generate a private service token}
+      INVESTLAB_AI_INSTANCE_ID: ${INVESTLAB_AI_INSTANCE_ID:-}
+      INVESTLAB_AI_ENABLE_LOCAL_CHAT: "true"
+      INVESTLAB_AI_USE_DOCKER_DB: "false"
+      INVESTLAB_AI_OPENAI_MODEL: ${INVESTLAB_AI_OPENAI_MODEL:-gpt-6.1-sol}
+      INVESTLAB_AI_BASIC_ANALYSIS_TOKENS: ${INVESTLAB_AI_BASIC_ANALYSIS_TOKENS:-16000}
+      INVESTLAB_AI_DART_API_KEY: ${INVESTLAB_AI_DART_API_KEY:-}
+      INVESTLAB_AI_OPENAI_API_KEY: ${INVESTLAB_AI_OPENAI_API_KEY:-}
+      INVESTLAB_AI_TOSS_CLIENT_ID: ${INVESTLAB_AI_TOSS_CLIENT_ID:-}
+      INVESTLAB_AI_TOSS_CLIENT_SECRET: ${INVESTLAB_AI_TOSS_CLIENT_SECRET:-}
+      INVESTLAB_AI_TOSS_REQUESTS_PER_SECOND: ${INVESTLAB_AI_TOSS_REQUESTS_PER_SECOND:-5}
+      INVESTLAB_AI_SEC_USER_AGENT: ${INVESTLAB_AI_SEC_USER_AGENT:-}
+      INVESTLAB_AI_SEC_REQUESTS_PER_SECOND: ${INVESTLAB_AI_SEC_REQUESTS_PER_SECOND:-2}
+      INVESTLAB_AI_SEC_BASIC_ANALYSIS_TOKENS: ${INVESTLAB_AI_SEC_BASIC_ANALYSIS_TOKENS:-10000}
+      INVESTLAB_AI_PRIVATE_CACHE_DIR: /app/.local/private
+      TIKTOKEN_CACHE_DIR: /tmp/tiktoken
+    volumes:
+      - ai-private-cache:/app/.local/private
+    ports:
+      - "127.0.0.1:${INVESTLAB_CHAT_PORT:-8000}:8000"
+    healthcheck:
+      test: [CMD, /app/.venv/bin/python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
+      interval: 5s
+      timeout: 4s
+      retries: 30
+volumes:
+  ai-private-cache:

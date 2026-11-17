@@ -1,0 +1,25 @@
+name: investlab-ai-local
+services:
+  postgres:
+    image: postgres:16-bookworm
+    restart: "no"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${RESEARCH_DB_ADMIN_PASSWORD:?Run setup-postgres.cmd first}
+      POSTGRES_DB: ${RESEARCH_DB_NAME:-investlab_research}
+      RESEARCH_DB_USERNAME: ${RESEARCH_DB_USERNAME:-investlab_research}
+      RESEARCH_DB_PASSWORD: ${RESEARCH_DB_PASSWORD:?Run setup-postgres.cmd first}
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
+    ports:
+      - "127.0.0.1:${RESEARCH_DB_PORT:-5432}:5432"
+    volumes:
+      - research-data:/var/lib/postgresql/data
+      - ./docker/postgres/01-app-user.sh:/docker-entrypoint-initdb.d/01-app-user.sh:ro
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 3s
+      timeout: 3s
+      retries: 40
+      start_period: 10s
+volumes:
+  research-data:

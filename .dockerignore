@@ -15,3 +15,5 @@ dist/
 *.iml
 
 .git/
+.local/
+.vscode/

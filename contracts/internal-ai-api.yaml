@@ -1,40 +1,1178 @@
 openapi: 3.1.0
 info:
-  title: InvestLab Internal AI API
-  version: 0.1.0
-  description: 초기 서비스 인증·미구현 경계 계약. 실제 분석·출처 응답은 후속 구현합니다.
+  title: InvestLab Internal AI
+  version: 0.3.0
 paths:
-  /health:
+  /internal/v1/overseas-companies:
     get:
-      security: []
+      summary: Companies
+      operationId: companies_internal_v1_overseas_companies_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: query
+        in: query
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 100
+          title: Query
       responses:
         '200':
-          description: 프로세스 liveness 정상. DB·LLM readiness를 보장하지 않습니다.
-  /internal/v1/questions:
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OverseasCompany'
+                title: Response Companies Internal V1 Overseas Companies Get
+        '401':
+          description: INVALID_SERVICE_CREDENTIALS
+        '404':
+          description: 공시 또는 원문 없음
+        '409':
+          description: 준비 상태, 모델 불일치, 동시 요청 충돌
+        '429':
+          description: DART/OpenAI 호출 제한
+        '413':
+          description: 공시/ZIP 크기 또는 문서 조각 수 제한 초과
+        '502':
+          description: 외부 응답 또는 인용 검증 실패
+        '503':
+          description: 서비스 미설정 또는 DB 사용 불가
+        '504':
+          description: 외부 서비스 제한시간 초과
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /internal/v1/overseas-companies/{cik}/disclosures:
+    get:
+      summary: Filings
+      operationId: filings_internal_v1_overseas_companies__cik__disclosures_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: cik
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^\d{10}$
+          title: Cik
+      - name: startDate
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Startdate
+      - name: endDate
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Enddate
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SecFiling'
+                title: Response Filings Internal V1 Overseas Companies  Cik  Disclosures
+                  Get
+        '401':
+          description: INVALID_SERVICE_CREDENTIALS
+        '404':
+          description: 공시 또는 원문 없음
+        '409':
+          description: 준비 상태, 모델 불일치, 동시 요청 충돌
+        '429':
+          description: DART/OpenAI 호출 제한
+        '413':
+          description: 공시/ZIP 크기 또는 문서 조각 수 제한 초과
+        '502':
+          description: 외부 응답 또는 인용 검증 실패
+        '503':
+          description: 서비스 미설정 또는 DB 사용 불가
+        '504':
+          description: 외부 서비스 제한시간 초과
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /internal/v1/sec-disclosures/{accession}/prepare:
     post:
+      summary: Prepare
+      operationId: prepare_internal_v1_sec_disclosures__accession__prepare_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: accession
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^\d{10}-\d{2}-\d{6}$
+          title: Accession
+      - name: cik
+        in: query
+        required: true
+        schema:
+          type: string
+          pattern: ^\d{10}$
+          title: Cik
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecPrepared'
+        '401':
+          description: INVALID_SERVICE_CREDENTIALS
+        '404':
+          description: 공시 또는 원문 없음
+        '409':
+          description: 준비 상태, 모델 불일치, 동시 요청 충돌
+        '429':
+          description: DART/OpenAI 호출 제한
+        '413':
+          description: 공시/ZIP 크기 또는 문서 조각 수 제한 초과
+        '502':
+          description: 외부 응답 또는 인용 검증 실패
+        '503':
+          description: 서비스 미설정 또는 DB 사용 불가
+        '504':
+          description: 외부 서비스 제한시간 초과
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /internal/v1/sec-disclosures/{accession}/basic-analysis:
+    post:
+      summary: Basic
+      operationId: basic_internal_v1_sec_disclosures__accession__basic_analysis_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: accession
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^\d{10}-\d{2}-\d{6}$
+          title: Accession
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecResponse'
+        '401':
+          description: INVALID_SERVICE_CREDENTIALS
+        '404':
+          description: 공시 또는 원문 없음
+        '409':
+          description: 준비 상태, 모델 불일치, 동시 요청 충돌
+        '429':
+          description: DART/OpenAI 호출 제한
+        '413':
+          description: 공시/ZIP 크기 또는 문서 조각 수 제한 초과
+        '502':
+          description: 외부 응답 또는 인용 검증 실패
+        '503':
+          description: 서비스 미설정 또는 DB 사용 불가
+        '504':
+          description: 외부 서비스 제한시간 초과
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /internal/v1/sec-disclosures/{accession}/questions:
+    post:
+      summary: Question
+      operationId: question_internal_v1_sec_disclosures__accession__questions_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: accession
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^\d{10}-\d{2}-\d{6}$
+          title: Accession
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              required: [question]
-              properties:
-                question:
-                  type: string
-                  minLength: 1
-                  maxLength: 4000
+              $ref: '#/components/schemas/SecQuestion'
       responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecResponse'
         '401':
-          description: 내부 서비스 인증 실패
-        '422':
-          description: 입력 검증 실패
+          description: INVALID_SERVICE_CREDENTIALS
+        '404':
+          description: 공시 또는 원문 없음
+        '409':
+          description: 준비 상태, 모델 불일치, 동시 요청 충돌
+        '429':
+          description: DART/OpenAI 호출 제한
+        '413':
+          description: 공시/ZIP 크기 또는 문서 조각 수 제한 초과
+        '502':
+          description: 외부 응답 또는 인용 검증 실패
         '503':
-          description: AI_NOT_CONFIGURED. 아직 분석 기능을 제공하지 않습니다.
+          description: 서비스 미설정 또는 DB 사용 불가
+        '504':
+          description: 외부 서비스 제한시간 초과
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /health:
+    get:
+      summary: Health
+      description: Process liveness only; does not promise DB/provider readiness.
+      operationId: health_health_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+                title: Response Health Health Get
+  /internal/v1/companies/sync:
+    post:
+      summary: Sync Companies
+      operationId: sync_companies_internal_v1_companies_sync_post
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: integer
+                type: object
+                title: Response Sync Companies Internal V1 Companies Sync Post
+        '401':
+          description: INVALID_SERVICE_CREDENTIALS
+        '404':
+          description: 공시 또는 원문 없음
+        '409':
+          description: 준비 상태, 모델 불일치, 동시 요청 충돌
+        '429':
+          description: DART/OpenAI 호출 제한
+        '413':
+          description: 공시/ZIP 크기 또는 문서 조각 수 제한 초과
+        '502':
+          description: 외부 응답 또는 인용 검증 실패
+        '503':
+          description: 서비스 미설정 또는 DB 사용 불가
+        '504':
+          description: 외부 서비스 제한시간 초과
+      security:
+      - HTTPBearer: []
+  /internal/v1/companies:
+    get:
+      summary: Companies
+      operationId: companies_internal_v1_companies_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: query
+        in: query
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 100
+          title: Query
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Company'
+                title: Response Companies Internal V1 Companies Get
+        '401':
+          description: INVALID_SERVICE_CREDENTIALS
+        '404':
+          description: 공시 또는 원문 없음
+        '409':
+          description: 준비 상태, 모델 불일치, 동시 요청 충돌
+        '429':
+          description: DART/OpenAI 호출 제한
+        '413':
+          description: 공시/ZIP 크기 또는 문서 조각 수 제한 초과
+        '502':
+          description: 외부 응답 또는 인용 검증 실패
+        '503':
+          description: 서비스 미설정 또는 DB 사용 불가
+        '504':
+          description: 외부 서비스 제한시간 초과
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /internal/v1/disclosures:
+    get:
+      summary: Disclosures
+      operationId: disclosures_internal_v1_disclosures_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: corpCode
+        in: query
+        required: true
+        schema:
+          type: string
+          pattern: ^\d{8}$
+          title: Corpcode
+      - name: startDate
+        in: query
+        required: true
+        schema:
+          type: string
+          format: date
+          title: Startdate
+      - name: endDate
+        in: query
+        required: true
+        schema:
+          type: string
+          format: date
+          title: Enddate
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 10000
+          minimum: 1
+          default: 1
+          title: Page
+      - name: finalOnly
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: false
+          title: Finalonly
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DisclosurePage'
+        '401':
+          description: INVALID_SERVICE_CREDENTIALS
+        '404':
+          description: 공시 또는 원문 없음
+        '409':
+          description: 준비 상태, 모델 불일치, 동시 요청 충돌
+        '429':
+          description: DART/OpenAI 호출 제한
+        '413':
+          description: 공시/ZIP 크기 또는 문서 조각 수 제한 초과
+        '502':
+          description: 외부 응답 또는 인용 검증 실패
+        '503':
+          description: 서비스 미설정 또는 DB 사용 불가
+        '504':
+          description: 외부 서비스 제한시간 초과
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /internal/v1/disclosures/{rcept_no}/prepare:
+    post:
+      summary: Prepare
+      operationId: prepare_internal_v1_disclosures__rcept_no__prepare_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: rcept_no
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^\d{14}$
+          title: Rcept No
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreparedDocument'
+        '401':
+          description: INVALID_SERVICE_CREDENTIALS
+        '404':
+          description: 공시 또는 원문 없음
+        '409':
+          description: 준비 상태, 모델 불일치, 동시 요청 충돌
+        '429':
+          description: DART/OpenAI 호출 제한
+        '413':
+          description: 공시/ZIP 크기 또는 문서 조각 수 제한 초과
+        '502':
+          description: 외부 응답 또는 인용 검증 실패
+        '503':
+          description: 서비스 미설정 또는 DB 사용 불가
+        '504':
+          description: 외부 서비스 제한시간 초과
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /internal/v1/disclosures/{rcept_no}:
+    get:
+      summary: Document
+      operationId: document_internal_v1_disclosures__rcept_no__get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: rcept_no
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^\d{14}$
+          title: Rcept No
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreparedDocument'
+        '401':
+          description: INVALID_SERVICE_CREDENTIALS
+        '404':
+          description: 공시 또는 원문 없음
+        '409':
+          description: 준비 상태, 모델 불일치, 동시 요청 충돌
+        '429':
+          description: DART/OpenAI 호출 제한
+        '413':
+          description: 공시/ZIP 크기 또는 문서 조각 수 제한 초과
+        '502':
+          description: 외부 응답 또는 인용 검증 실패
+        '503':
+          description: 서비스 미설정 또는 DB 사용 불가
+        '504':
+          description: 외부 서비스 제한시간 초과
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /internal/v1/disclosures/{rcept_no}/analysis-plan:
+    get:
+      summary: Plan
+      operationId: plan_internal_v1_disclosures__rcept_no__analysis_plan_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: rcept_no
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^\d{14}$
+          title: Rcept No
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalysisPlan'
+        '401':
+          description: INVALID_SERVICE_CREDENTIALS
+        '404':
+          description: 공시 또는 원문 없음
+        '409':
+          description: 준비 상태, 모델 불일치, 동시 요청 충돌
+        '429':
+          description: DART/OpenAI 호출 제한
+        '413':
+          description: 공시/ZIP 크기 또는 문서 조각 수 제한 초과
+        '502':
+          description: 외부 응답 또는 인용 검증 실패
+        '503':
+          description: 서비스 미설정 또는 DB 사용 불가
+        '504':
+          description: 외부 서비스 제한시간 초과
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /internal/v1/disclosures/{rcept_no}/analyze:
+    post:
+      summary: Analyze
+      operationId: analyze_internal_v1_disclosures__rcept_no__analyze_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: rcept_no
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^\d{14}$
+          title: Rcept No
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalysisRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Answer'
+        '401':
+          description: INVALID_SERVICE_CREDENTIALS
+        '404':
+          description: 공시 또는 원문 없음
+        '409':
+          description: 준비 상태, 모델 불일치, 동시 요청 충돌
+        '429':
+          description: DART/OpenAI 호출 제한
+        '413':
+          description: 공시/ZIP 크기 또는 문서 조각 수 제한 초과
+        '502':
+          description: 외부 응답 또는 인용 검증 실패
+        '503':
+          description: 서비스 미설정 또는 DB 사용 불가
+        '504':
+          description: 외부 서비스 제한시간 초과
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /internal/v1/questions:
+    post:
+      summary: Question
+      operationId: question_internal_v1_questions_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Question'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Answer'
+        '401':
+          description: INVALID_SERVICE_CREDENTIALS
+        '404':
+          description: 공시 또는 원문 없음
+        '409':
+          description: 준비 상태, 모델 불일치, 동시 요청 충돌
+        '429':
+          description: DART/OpenAI 호출 제한
+        '413':
+          description: 공시/ZIP 크기 또는 문서 조각 수 제한 초과
+        '502':
+          description: 외부 응답 또는 인용 검증 실패
+        '503':
+          description: 서비스 미설정 또는 DB 사용 불가
+        '504':
+          description: 외부 서비스 제한시간 초과
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+      - HTTPBearer: []
 components:
+  schemas:
+    AnalysisPlan:
+      properties:
+        rceptNo:
+          type: string
+          title: Rceptno
+        chunkCount:
+          type: integer
+          title: Chunkcount
+        modelCalls:
+          type: integer
+          title: Modelcalls
+        estimatedEvidenceTokens:
+          type: integer
+          title: Estimatedevidencetokens
+      additionalProperties: false
+      type: object
+      required:
+      - rceptNo
+      - chunkCount
+      - modelCalls
+      - estimatedEvidenceTokens
+      title: AnalysisPlan
+    AnalysisRequest:
+      properties:
+        maxModelCalls:
+          type: integer
+          maximum: 100.0
+          minimum: 1.0
+          title: Maxmodelcalls
+          default: 10
+      additionalProperties: false
+      type: object
+      title: AnalysisRequest
+    Answer:
+      properties:
+        status:
+          type: string
+          enum:
+          - answered
+          - insufficient_evidence
+          title: Status
+        rceptNo:
+          type: string
+          title: Rceptno
+        answer:
+          type: string
+          title: Answer
+        claims:
+          items:
+            $ref: '#/components/schemas/Claim'
+          type: array
+          title: Claims
+        sources:
+          items:
+            $ref: '#/components/schemas/Evidence'
+          type: array
+          title: Sources
+        model:
+          type: string
+          title: Model
+        modelCalls:
+          type: integer
+          title: Modelcalls
+        warnings:
+          items:
+            type: string
+          type: array
+          title: Warnings
+        cached:
+          type: boolean
+          title: Cached
+          default: false
+        generatedAt:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Generatedat
+        analysisScope:
+          type: string
+          title: Analysisscope
+          default: question
+        inputTokens:
+          type: integer
+          title: Inputtokens
+          default: 0
+        outputTokens:
+          type: integer
+          title: Outputtokens
+          default: 0
+      additionalProperties: false
+      type: object
+      required:
+      - status
+      - rceptNo
+      - answer
+      - claims
+      - sources
+      - model
+      - modelCalls
+      - warnings
+      title: Answer
+    Claim:
+      properties:
+        category:
+          type: string
+          enum:
+          - summary
+          - business
+          - performance
+          - risk
+          - follow_up
+          title: Category
+        text:
+          type: string
+          maxLength: 3000
+          minLength: 1
+          title: Text
+        evidenceIds:
+          items:
+            type: string
+          type: array
+          maxItems: 8
+          minItems: 1
+          title: Evidenceids
+      additionalProperties: false
+      type: object
+      required:
+      - category
+      - text
+      - evidenceIds
+      title: Claim
+    Company:
+      properties:
+        companyId:
+          type: string
+          title: Companyid
+        corpCode:
+          type: string
+          pattern: ^\d{8}$
+          title: Corpcode
+        corpName:
+          type: string
+          title: Corpname
+        stockCode:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Stockcode
+      additionalProperties: false
+      type: object
+      required:
+      - companyId
+      - corpCode
+      - corpName
+      title: Company
+    Disclosure:
+      properties:
+        rceptNo:
+          type: string
+          pattern: ^\d{14}$
+          title: Rceptno
+        corpCode:
+          type: string
+          pattern: ^\d{8}$
+          title: Corpcode
+        corpName:
+          type: string
+          title: Corpname
+        reportName:
+          type: string
+          title: Reportname
+        filedOn:
+          type: string
+          format: date
+          title: Filedon
+        sourceUrl:
+          type: string
+          title: Sourceurl
+        remarks:
+          type: string
+          title: Remarks
+          default: ''
+      additionalProperties: false
+      type: object
+      required:
+      - rceptNo
+      - corpCode
+      - corpName
+      - reportName
+      - filedOn
+      - sourceUrl
+      title: Disclosure
+    DisclosurePage:
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/Disclosure'
+          type: array
+          title: Items
+        page:
+          type: integer
+          title: Page
+        totalPages:
+          type: integer
+          title: Totalpages
+      additionalProperties: false
+      type: object
+      required:
+      - items
+      - page
+      - totalPages
+      title: DisclosurePage
+    Evidence:
+      properties:
+        chunkId:
+          type: string
+          title: Chunkid
+        section:
+          type: string
+          title: Section
+        text:
+          type: string
+          title: Text
+        sourceUrl:
+          type: string
+          title: Sourceurl
+      additionalProperties: false
+      type: object
+      required:
+      - chunkId
+      - section
+      - text
+      - sourceUrl
+      title: Evidence
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    OverseasCompany:
+      properties:
+        companyId:
+          type: string
+          title: Companyid
+        corpCode:
+          type: 'null'
+          title: Corpcode
+        corpName:
+          type: string
+          title: Corpname
+        stockCode:
+          type: string
+          title: Stockcode
+        cik:
+          anyOf:
+          - type: string
+            pattern: ^\d{10}$
+          - type: 'null'
+          title: Cik
+        market:
+          type: string
+          title: Market
+          default: US
+        currency:
+          type: string
+          const: USD
+          title: Currency
+          default: USD
+        aliases:
+          items:
+            type: string
+          type: array
+          title: Aliases
+      additionalProperties: false
+      type: object
+      required:
+      - companyId
+      - corpName
+      - stockCode
+      title: OverseasCompany
+    PreparedDocument:
+      properties:
+        documentId:
+          type: string
+          title: Documentid
+        disclosure:
+          $ref: '#/components/schemas/Disclosure'
+        chunkCount:
+          type: integer
+          title: Chunkcount
+        embeddingModel:
+          type: string
+          title: Embeddingmodel
+        contentHash:
+          type: string
+          title: Contenthash
+        warnings:
+          items:
+            type: string
+          type: array
+          title: Warnings
+      additionalProperties: false
+      type: object
+      required:
+      - documentId
+      - disclosure
+      - chunkCount
+      - embeddingModel
+      - contentHash
+      - warnings
+      title: PreparedDocument
+    Question:
+      properties:
+        question:
+          type: string
+          maxLength: 4000
+          minLength: 1
+          title: Question
+        rceptNo:
+          anyOf:
+          - type: string
+            pattern: ^\d{14}$
+          - type: 'null'
+          title: Rceptno
+      additionalProperties: false
+      type: object
+      required:
+      - question
+      title: Question
+    SecAnswer:
+      properties:
+        status:
+          type: string
+          enum:
+          - answered
+          - insufficient_evidence
+          title: Status
+        answer:
+          type: string
+          title: Answer
+        claims:
+          items:
+            $ref: '#/components/schemas/Claim'
+          type: array
+          title: Claims
+        sources:
+          items:
+            $ref: '#/components/schemas/Evidence'
+          type: array
+          title: Sources
+        model:
+          type: string
+          title: Model
+        modelCalls:
+          type: integer
+          title: Modelcalls
+        cached:
+          type: boolean
+          title: Cached
+        analysisScope:
+          type: string
+          enum:
+          - basic
+          - question
+          title: Analysisscope
+        generatedAt:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Generatedat
+        inputTokens:
+          type: integer
+          title: Inputtokens
+          default: 0
+        outputTokens:
+          type: integer
+          title: Outputtokens
+          default: 0
+        warnings:
+          items:
+            type: string
+          type: array
+          title: Warnings
+      additionalProperties: false
+      type: object
+      required:
+      - status
+      - answer
+      - claims
+      - sources
+      - model
+      - modelCalls
+      - cached
+      - analysisScope
+      - warnings
+      title: SecAnswer
+    SecFiling:
+      properties:
+        accession:
+          type: string
+          pattern: ^\d{10}-\d{2}-\d{6}$
+          title: Accession
+        cik:
+          type: string
+          pattern: ^\d{10}$
+          title: Cik
+        symbol:
+          type: string
+          title: Symbol
+        issuerName:
+          type: string
+          title: Issuername
+        form:
+          type: string
+          title: Form
+        filedOn:
+          type: string
+          format: date
+          title: Filedon
+        acceptedAt:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Acceptedat
+        reportDate:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Reportdate
+        primaryDocument:
+          type: string
+          title: Primarydocument
+        sourceUrl:
+          type: string
+          title: Sourceurl
+      additionalProperties: false
+      type: object
+      required:
+      - accession
+      - cik
+      - symbol
+      - issuerName
+      - form
+      - filedOn
+      - primaryDocument
+      - sourceUrl
+      title: SecFiling
+    SecPrepared:
+      properties:
+        filing:
+          $ref: '#/components/schemas/SecFiling'
+        chunkCount:
+          type: integer
+          title: Chunkcount
+        contentHash:
+          type: string
+          title: Contenthash
+        parserVersion:
+          type: string
+          title: Parserversion
+      additionalProperties: false
+      type: object
+      required:
+      - filing
+      - chunkCount
+      - contentHash
+      - parserVersion
+      title: SecPrepared
+    SecQuestion:
+      properties:
+        question:
+          type: string
+          maxLength: 4000
+          minLength: 1
+          pattern: \S
+          title: Question
+      additionalProperties: false
+      type: object
+      required:
+      - question
+      title: SecQuestion
+    SecResponse:
+      properties:
+        filing:
+          $ref: '#/components/schemas/SecFiling'
+        result:
+          $ref: '#/components/schemas/SecAnswer'
+      additionalProperties: false
+      type: object
+      required:
+      - filing
+      - result
+      title: SecResponse
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
   securitySchemes:
-    serviceAuth:
+    HTTPBearer:
       type: http
       scheme: bearer
-security:
-  - serviceAuth: []
